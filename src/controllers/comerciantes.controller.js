@@ -5,7 +5,7 @@ const db = require('../../database/db');
 
 const getComerciantes = (req, res) => {
     try {
-        const query = 'SELECT * FROM comerciantes';
+        const query = 'SELECT * FROM UsuariosComerciantes';
         db.query(query, (error, rows) => {
             if (error) {
                 console.error('El error de conexión es: ' + error);
