@@ -3,9 +3,7 @@ const router = Router();
 
 const {
     
-    getComerciantes,
-    createComerciantes
-
+    getComerciantes
 
 } = require('../controllers/comerciantes.controller');
 
@@ -13,7 +11,6 @@ const {
 // Routes
 
 router.get('/comerciantes', getComerciantes); // Get all comerciantes
-router.post('/comerciantes', createComerciantes); // Create a comerciante
 
 
 module.exports = router;

@@ -24,6 +24,5 @@ const getComerciantes = (req, res) => {
 }
 
 module.exports = {
-    getComerciantes,
-    createComerciantes
+    getComerciantes
 }
