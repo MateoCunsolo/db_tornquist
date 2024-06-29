@@ -12,7 +12,10 @@ connection.connect((error) => {
         console.error('El error de conexión es: ' + error);
         return;
     }
-    console.log('Conexión exitosa a la base de datos');
+    console.log('\nConexión exitosa a la base de datos:');
+    console.log('\t---- > Host: ' + process.env.DB_HOST);
+    console.log('\t---- > Usuario: ' + process.env.DB_USER);
+    console.log('\t---- > Base de datos: ' + process.env.DB_NAME);
 });
 
 module.exports = connection;
