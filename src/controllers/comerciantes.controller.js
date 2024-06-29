@@ -4,23 +4,9 @@ const db = require('../../database/db');
 
 
 const getComerciantes = (req, res) => {
-    try {
-        const query = 'SELECT * FROM UsuariosComerciantes';
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay comerciantes registrados'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
+    res.json({
+        message: 'Get all comerciantes'
+    });
 }
 
 module.exports = {
