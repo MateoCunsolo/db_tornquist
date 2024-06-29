@@ -10,6 +10,12 @@ const {
 
 // Routes
 
+router.get('/', (req, res) => {
+    res.json({
+      message: 'Bienvenido a la API de Turismo',
+  });
+  });
+  
 router.get('/comerciantes', getComerciantes); // Get all comerciantes
 
 
