@@ -1,8 +1,8 @@
-const db = require('../../database/db');
 const util = require('util');
+const pool = require('../../database/db');
 
-// Promisificar el método db.query
-const queryAsync = util.promisify(db.query).bind(db);
+// Promisificar el método query del pool de conexiones
+const queryAsync = util.promisify(pool.query).bind(pool);
 
 const getComerciantes = async (req, res) => {
     try {
