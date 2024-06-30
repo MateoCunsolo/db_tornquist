@@ -1,15 +1,19 @@
 const express = require('express');
-const mysql = require('mysql2');
+const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 
-//middlewares
+// Middlewares
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
-//routes
-app.use(require('./routes/all.routes'));
+// Configuración de multer
+const upload = multer();
+app.use(upload.none()); 
+
+// Routes
+app.use(require('./routes/all.routes')); 
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
