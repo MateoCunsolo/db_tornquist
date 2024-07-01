@@ -1,4 +1,4 @@
-require('dotenv').config();//levanta las variables de entorno
+require('dotenv').config(); //levanta las variables de entorno
 const express = require('express');
 const multer = require('multer');
 
@@ -13,8 +13,8 @@ const upload = multer();
 app.use(upload.none()); 
 
 // Routes
+app.use("/auth",require('./routes/auth.router'));
 app.use(require('./routes/all.routes'));
-app.use("/login",require('./routes/auth.router'));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -41,26 +41,49 @@ const getComerciante_models = (req, res) => {
     }
 }
 
+const getComercianteNombre_models = (nombre) => {
+    return new Promise((resolve, reject) => {
+        try {
+            const query = `SELECT * FROM UsuariosComerciantes WHERE nombre = ?`;
+            db.query(query, [nombre], (error, rows) => {
+                if (error) {
+                    console.error('El error de conexión es: ' + error);
+                    reject(error);
+                } else if (rows.length === 0) {
+                    resolve(null);
+                } else {
+                    resolve(rows[0]);
+                }
+            });
+        } catch (error) {
+            console.error('El error de conexión es: ' + error);
+            reject(error);
+        }
+    });
+}
+
+
 
 const createComerciante_models = (req, res) => {
-    try {
-        const { nombre, telefono, paginaWeb, ubicacion } = req.body;
-        console.log(req.body);
-        const query = `INSERT INTO UsuariosComerciantes (nombre, telefono, paginaWeb, ubicacion) VALUES ('${nombre}', '${telefono}', '${paginaWeb}', '${ubicacion}')`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Comerciante creado correctamente'
+    return new Promise((resolve, reject) => {
+        try {
+            const { nombre, telefono, paginaWeb, ubicacion, contrasenia } = req.body;
+            const query = `INSERT INTO UsuariosComerciantes (nombre, contrasenia, paginaWeb, ubicacion, telefono) VALUES (?, ?, ?, ?, ?)`;
+            db.query(query, [nombre, contrasenia, paginaWeb, ubicacion, telefono], (error, rows) => {
+                if (error) {
+                    console.error('El error de conexión es: ' + error);
+                    reject(error);
+                } else {
+                    resolve(rows.insertId);
+                }
             });
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-
+        } catch (error) {
+            console.error('El error de conexión es: ' + error);
+            reject(error);
+        }
+    });
 }
+
 
 const deleteComerciante_models = (req, res) => {
     try {
@@ -115,5 +138,6 @@ module.exports = {
     getComerciante_models,
     createComerciante_models,
     deleteComerciante_models,
-    updateComerciante_models
+    updateComerciante_models,
+    getComercianteNombre_models
 }

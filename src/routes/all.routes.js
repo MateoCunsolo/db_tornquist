@@ -56,7 +56,6 @@ router.get('/', (req, res) => {res.json({message: 'Bienvenido a la API de Turism
 
 // [ C O M E R C I A N T E S ]
 router.get('/comerciantes', getComerciantes); // Get all comerciantes
-router.post('/comerciantes', createComerciante); // Create comerciante
 router.get('/comerciantes/:id', getComerciante); // Get comerciante by id
 router.delete('/comerciantes/:id', deleteComerciante); // Delete comerciante by id
 router.put('/comerciantes/:id', updateComerciante); // Update comerciante by id
@@ -86,8 +85,6 @@ router.post('/posteos', createPosteo); // Create posteo
 router.get('/posteos/:id', getPosteo); // Get posteo by id
 router.delete('/posteos/:id', deletePosteo); // Delete posteo by id
 router.put('/posteos/:id', updatePosteo); // Update posteo by id
-
-
 
 
 //ruta geenrica si cualquier ruta es ingresada 

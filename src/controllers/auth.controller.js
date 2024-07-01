@@ -1,60 +1,52 @@
 const jwt = require('jsonwebtoken');
 const bycrypt = require('bcryptjs');
-const db = require('../../database/db');
+const { createComerciante_models, getComercianteNombre_models } = require('../../models/comerciantes.model');
 
 const register = async (req, res) => {
     try {
-        const { nombre, email, password } = req.body;
-        const hashedPassword = await bycrypt.hash(password, 10);
-        const query = `INSERT INTO Usuario (nombre, email, password) VALUES ('${nombre}', '${email}', '${hashedPassword}')`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Usuario creado correctamente'
-            });
+        const { nombre, contrasenia } = req.body;
+        const hashedPassword = bycrypt.hashSync(contrasenia, 8);
+        req.body.contrasenia = hashedPassword;
+
+        const id = await createComerciante_models(req, res);
+        console.log(id);
+
+        const token = jwt.sign({ idUser: id }, process.env.SECRET_KEY, {
+            expiresIn: '1h'
         });
-    }catch (error) {
+        res.send({ auth: true, token: token, id: id });
+    } catch (error) {
         console.error('El error de conexión es: ' + error);
+        res.status(500).json({ message: 'Error al registrar el comerciante' });
     }
 }
 
 const login = async (req, res) => {
+    const { nombre, contrasenia } = req.body;
+    console.log('Este es el usuario que esta intentando iniciar sesion\n', req.body);
     try {
-        const { email, password } = req.body;
-        const query = `SELECT * FROM Usuario WHERE email = '${email}'`;
-        db.query(query, async (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'El usuario no existe'
-                });
-                return;
-            }
-            const user = rows[0];
-            const validPassword = await bycrypt.compare(password, user.password);
-            if (!validPassword) {
-                res.json({
-                    message: 'La contraseña no es válida'
-                });
-                return;
-            }
-            const token = jwt.sign({ id: user.idUsuario, email: user.email }, process.env.SECRET_KEY, {
-                expiresIn: 86400
-            });
+        const usuario = await getComercianteNombre_models(nombre);
+        if (!usuario) {
             res.json({
-                message: 'Login correcto',
-                token
+                message: 'El comerciante no existe'
             });
+        }
+        
+        const passwordIsValid = bycrypt.compareSync(contrasenia, usuario.contrasenia);
+        if (!passwordIsValid) {
+            return res.status(401).json({ auth: false, token: null });
+        }
+
+        const token = jwt.sign({ idUser: usuario.idUsuarioCom }, process.env.SECRET_KEY, {
+            expiresIn: '1h'
         });
-    }catch (error) {
+        res.send({ auth: true, token: token, id: usuario.idUsuarioCom });
+    } catch (error) {
         console.error('El error de conexión es: ' + error);
+        res.status(500).json({ message: 'Error al obtener el comerciante' });
     }
 }
+
 
 module.exports = {
     register,
