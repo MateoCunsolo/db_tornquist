@@ -87,6 +87,9 @@ router.get('/posteos/:id', getPosteo); // Get posteo by id
 router.delete('/posteos/:id', deletePosteo); // Delete posteo by id
 router.put('/posteos/:id', updatePosteo); // Update posteo by id
 
+
+
+
 //ruta geenrica si cualquier ruta es ingresada 
 router.get('*', (req, res) => {res.json({message: 'Ruta no encontrada'});});
 
