@@ -1,114 +1,68 @@
-const db = require('../database/db');
+const executeQuery = require('../utils/executeQuery');
 
 const getCategorias_models = (req, res) => {
-    try {
-        const query = 'SELECT * FROM Categoria';
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay categorias registradas'
-                });
-                return;
-            }
-            res.json(rows);
+    const query = 'SELECT Nombre FROM Categoria';
+    executeQuery(query).then((results) => {
+        if(results.length === 0){
+            res.json({message: 'No hay categorias'});
         }
-        );
-    }catch(error)
-    {
-        console.log('El error de conexión es: ' + error);
-    }
-}
+        else{
+            res.json(results);
+        }
+        }).catch((error) => {
+            console.error('El error de conexión es: ' + error);
+        });
+};
 
 const createCategoria_models = (req, res) => {
-    try {
-        const { nombre } = req.body;
-        console.log(req.body);
-        const query = `INSERT INTO Categorias (Nombre) VALUES ('${nombre}')`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Categoria creada correctamente'
-            });
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
+    const { Nombre } = req.body;
+    if (!Nombre) {
+        return res.status(400).json({ message: 'El campo Nombre es obligatorio' });
+    
     }
-}
+    const query = `INSERT INTO Categoria (Nombre) VALUES (?)`;
+    executeQuery(query, [Nombre])
+        .then((results) => {
+            if (results.affectedRows === 0) {
+                res.json({ message: 'No se pudo crear la categoria' });
+            } else {
+                res.json({ message: 'Categoria creada correctamente' });
+            }
+        })
+        .catch((error) => {
+            res.status(500).json({ message: 'Error en la creación de la categoria', error });
+        });
+};
+
 
 const getCategoria_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `SELECT * FROM Categoria WHERE idCategoria = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'La categoria no existe'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch(error)
-    {
-        console.log('El error de conexión es: ' + error);
-    }
+    const { Nombre } = req.params;
+    const query = `SELECT idCategoria FROM Categoria WHERE Nombre = ?`;
+    executeQuery(query, [Nombre]).then((results) => {
+        if (results.length === 0) {
+            res.json({message: 'La categoria no existe'});
+        }else{
+            res.json(results[0])
+        }
+    }).catch((error) => {
+        console.error('El error de conexión es: ' + error);
+    });
+
 }
 
 
-const deleteCategoria_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `DELETE FROM Categoria WHERE idCategoria = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay categorias registradas'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch(error)
-    {
-        console.log('El error de conexión es: ' + error);
-    }
-}
-
-const updateCategoria_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const { nombre } = req.body;
-        const query = `UPDATE Categoria SET Nombre = '${nombre}' WHERE idCategoria = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay categorias registradas'
-                });
-                return;
-            }
-            res.json({
-                message: 'Categoria actualizada correctamente'
-            });
-        });
-    }catch(error)
-    {
-        console.log('El error de conexión es: ' + error);
-    }
+const deleteCategoria_models = (req, res) => {    
+    const { Nombre } = req.body;
+    const query = `DELETE FROM Categoria WHERE Nombre = ?`;
+    executeQuery(query, [Nombre]).then((results) => {
+        if (results.affectedRows === 0) {
+            res.json({ message: 'La categoria no existe' });
+        } else {
+            res.json({ message: 'Categoria eliminada correctamente' });
+        }
+    }).catch((error) => {
+        console.error('El error de conexión es: ' + error);
+    });
 }
 
 
@@ -117,5 +71,4 @@ module.exports = {
     createCategoria_models,
     getCategoria_models,
     deleteCategoria_models,
-    updateCategoria_models
 }

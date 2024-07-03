@@ -1,103 +1,108 @@
-const db = require('../database/db');
+const executeQuery = require('../utils/executeQuery');
 
 const getPosteos_models = (req, res) => {
-    try {
-        const query = 'SELECT * FROM Posteo';
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay posteos registrados'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-};
-
-const createPosteo_models = (req, res) => {
-    try {
-        const { idPosteo, idUsuarioCom, idCategoria, Titulo, Descripcion, Imagen} = req.body;
-        db.query(`INSERT INTO Posteo (idPosteo, idUsuarioCom, idCategoria, Titulo, Descripcion, Imagen) VALUES ('${idPosteo}', '${idUsuarioCom}', '${idCategoria}', '${Titulo}', '${Descripcion}', '${Imagen}')`, 
-            (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
+    const query = 'SELECT * FROM Posteo';
+    executeQuery(query).then((response) => {
+        if(response.length == 0){
             res.json({
-                message: 'Posteo creado correctamente'
+                message: 'No hay posteos registrados'
             });
-        });
-    }catch (error) {
+        }else
+        {
+            res.json(response);
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
-    }
-}
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
+};
 
 const getPosteo_models = (req, res) => {
-    try{
-        const { id } = req.params;
-        const query = `SELECT * FROM Posteo WHERE idPosteo = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'El posteo no existe'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }
-    catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-};
-
-
-const deletePosteo_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `DELETE FROM Posteo WHERE idPosteo = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay posteos registrados'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-};
-
-const updatePosteo_models = (req, res) => {
-    try {
-        const { idPosteo, idUsuarioCom, idCategoria, Titulo, Descripcion, Imagen} = req.body;
-        db.query(`UPDATE Posteo SET idUsuarioCom = '${idUsuarioCom}', idCategoria = '${idCategoria}', Titulo = '${Titulo}', Descripcion = '${Descripcion}', Imagen = '${Imagen}' WHERE idPosteo = ${idPosteo}`, 
-            (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
+    const { id } = req.params;
+    const query = 'SELECT * FROM Posteo WHERE idPosteo = ?';
+    executeQuery(query, [id]).then((response) => {
+        if(response.length == 0){
             res.json({
-                message: 'Posteo actualizado correctamente'
+                message: 'No hay posteo registrado con ese id'
             });
-        });
-    }catch (error) {
+        }else
+        {
+            res.json(response[0]);
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
+};
+
+
+const createPosteo_models = async (req, res) => {
+    const { Titulo, Descripcion, Imagen, idUsuarioCom, NombreCategoria } = req.body;
+    console.log(req.body);
+    let idCategoria = await executeQuery('SELECT idCategoria FROM Categoria WHERE Nombre = ?', [NombreCategoria])
+    if (!idCategoria) {
+        return res.status(400).json({ message: 'El campo NombreCategoria es obligatorio' });
     }
+    else{
+        if (idCategoria.length === 0) {
+            return res.status(400).json({ message: 'La categoria no existe' });
+        }
+        else
+        {
+            idCategoria = idCategoria[0].idCategoria;
+            const query = `INSERT INTO Posteo (Titulo, Descripcion, Imagen, idUsuarioCom, idCategoria) VALUES (?, ?, ?, ?, ?)`;
+            executeQuery(query, [Titulo, Descripcion, Imagen, idUsuarioCom, idCategoria]).then((response) => {
+             res.json({ message: 'Posteo creado correctamente' });
+            }).catch((error) => {
+                console.error('El error de conexión es: ' + error);
+                res.status(500).json({ error: 'Error en el servidor' });
+            });
+        }
+    }
+}
+const deletePosteo_models = (req, res) => {
+    const { id } = req.params;
+    const query = `DELETE FROM Posteo WHERE idPosteo = ?`;
+    executeQuery(query, [id]).then((response) => {
+        if (response.affectedRows === 0) {
+            res.json({ message: 'El posteo no existe' });
+        } else {
+            res.json({ message: 'Posteo eliminado correctamente' });
+        }
+    }).catch((error) => {
+        console.error('El error de conexión es: ' + error);
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
+
+};
+
+const updatePosteo_models = async (req, res) => {
+    const { id } = req.params;
+    const { Titulo, Descripcion, Imagen, idUsuarioCom, NombreCategoria } = req.body;
+    let idCategoria = await executeQuery('SELECT idCategoria FROM Categoria WHERE Nombre = ?', [NombreCategoria])
+    if (!idCategoria) {
+        return res.status(400).json({ message: 'El campo NombreCategoria es obligatorio' });
+    }
+    else{
+        if (idCategoria.length === 0) {
+            return res.status(400).json({ message: 'La categoria no existe' });
+        }
+        else
+        {
+            idCategoria = idCategoria[0].idCategoria;
+            console.log(idCategoria);
+            const query = `UPDATE Posteo SET Titulo = ?, Descripcion = ?, Imagen = ?, idUsuarioCom = ?, idCategoria = ? WHERE idPosteo = ?`;
+            executeQuery(query, [Titulo, Descripcion, Imagen, idUsuarioCom, idCategoria, id]).then((response) => {
+                if (response.affectedRows === 0) {
+                    res.json({ message: 'El posteo no existe' });
+                } else {res.json({ message: 'Posteo actualizado correctamente' });}
+            }).catch((error) => {
+                console.error('El error de conexión es: ' + error);
+                res.status(500).json({ error: 'Error en el servidor' });
+            });
+        }
+    }
+
 };
 
 

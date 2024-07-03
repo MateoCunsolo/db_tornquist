@@ -8,10 +8,6 @@ const getComerciante = (req, res) => {
    models.getComerciante_models(req, res);
 }
 
-const createComerciante = (req, res) => {
-    models.createComerciante_models(req, res);
-}
-
 const deleteComerciante = (req, res) => {
     models.deleteComerciante_models(req, res);
 }
@@ -23,7 +19,6 @@ const updateComerciante = (req, res) => {
 module.exports = {
     getComerciantes,
     getComerciante,
-    createComerciante,
     deleteComerciante,
     updateComerciante
 }

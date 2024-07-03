@@ -1,85 +1,42 @@
-const db = require('../database/db');
+const executeQuery = require('../utils/executeQuery');
+const {getComercianteNombre_models } = require('./comerciantes.model');
 
 const getSuscripciones_models = (req, res) => {
-    try {
-        const query = 'SELECT * FROM Suscripciones';
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay suscripciones registradas'
-                });
-                return;
-            }
+    const query = 'SELECT * FROM Suscripciones';
+    executeQuery(query).then((rows) => {
+        if (rows.length === 0) {
+            res.json({ message: 'No hay suscripciones registradas' });
+        } else {
             res.json(rows);
-        });
-    }catch (error) {
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
-    }
+        res.status(500).json({ error: 'Error en el servidor' });
+    })
 }
 
-const createSuscripcion_models = (req, res) => {
-    try {
-        const { idCliente, idComerciante} = req.body;
-        console.log(req.body);
-        const query = `INSERT INTO Suscripciones (idCliente, idComerciante) VALUES ('${idCliente}', '${idComerciante}') `;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Suscripción creada correctamente'
-            });
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-}
+const getSuscripcionesDeComerciante_models = async (req, res) => {
+    const {nombreComerciante} = req.body;
+    const idUsuarioCom = await getComercianteNombre_models(nombreComerciante);
 
-const getSuscripcion_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `SELECT * FROM Suscripciones WHERE idSuscripciones = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'La suscripción no existe'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
+    if (!idUsuarioCom) {
+        return res.status(400).json({ error: 'El comerciante no existe' })
     }
-}
-const deleteSuscripcion_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `DELETE FROM Suscripciones WHERE idSuscripciones = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Suscripción eliminada correctamente'
-            });
-        });
-    }catch (error) {
+
+    const query = `SELECT * FROM Suscripciones WHERE idUsuarioCom = ?`;
+    executeQuery(query, [idUsuarioCom.idUsuarioCom]).then((rows) => {
+        if (rows.length === 0) {
+            res.json({ message: `El comerciante '${nombreComerciante}' no tiene suscripciones` });
+        } else {
+            res.json(rows[0]);
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
-    }
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
 }
 
 module.exports = {
     getSuscripciones_models,
-    createSuscripcion_models,
-    getSuscripcion_models,
-    deleteSuscripcion_models
+    getSuscripcionesDeComerciante_models,
 }

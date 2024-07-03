@@ -4,7 +4,6 @@ const router = Router();
 const {
     
     getComerciantes,
-    createComerciante,
     getComerciante,
     deleteComerciante,
     updateComerciante
@@ -15,7 +14,6 @@ const {
     
   getClientes,
   createCliente,
-  getCliente,
   deleteCliente
 
 } = require('../controllers/clientes.controller');
@@ -23,9 +21,7 @@ const {
 const {
     
   getSuscripciones,
-  createSuscripcion,
-  getSuscripcion,
-  deleteSuscripcion
+  getSuscripcionesComerciante,
 
 } = require('../controllers/suscripciones.controller');
 
@@ -35,8 +31,6 @@ const {
   createCategoria,
   getCategoria,
   deleteCategoria,
-  updateCategoria
-
 } = require('../controllers/categorias.controller');
 
 const {
@@ -63,21 +57,17 @@ router.put('/comerciantes/:id', updateComerciante); // Update comerciante by id
 // [ C L I E N T E S ]
 router.get('/clientes', getClientes); // Get all clientes
 router.post('/clientes', createCliente); // Create cliente
-router.get('/clientes/:id', getCliente); // Get cliente by id
 router.delete('/clientes/:id', deleteCliente); // Delete cliente by id
 
 // [ S U S C R I P C I O N E S ]
-router.get('/suscripciones', getSuscripciones); // Get all suscripciones
-router.post('/suscripciones', createSuscripcion); // Create suscripcion
-router.get('/suscripciones/:id', getSuscripcion); // Get suscripcion by id
-router.delete('/suscripciones/:id', deleteSuscripcion); // Delete suscripcion by id
+router.get('/suscripciones', getSuscripciones); // Get all suscripciones de todos los comerciantes
+router.get('/suscripciones/comerciante', getSuscripcionesComerciante); // Get suscripcion por nombre del comerciante
 
 // [ C A T E G O R I A S ]
 router.get('/categorias', getCategorias); // Get all categorias
+router.get('/categorias/:Nombre', getCategoria); // Get idCategoria por el Nombre
 router.post('/categorias', createCategoria); // Create categoria
-router.get('/categorias/:id', getCategoria); // Get categoria by id
-router.delete('/categorias/:id', deleteCategoria); // Delete categoria by id
-router.put('/categorias/:id', updateCategoria); // Update categoria by id
+router.delete('/categorias', deleteCategoria); // Delete categoria by Nombre
 
 // [ P O S T E O S ]
 router.get('/posteos', getPosteos); // Get all posteos

@@ -1,87 +1,68 @@
-const db = require('../database/db');
+const executeQuery = require("../utils/executeQuery");
+const { getComercianteNombre_models } = require("./comerciantes.model");
+
 
 const getClientes_models = (req, res) => {
-    try {
-        const query = 'SELECT * FROM Clientes';
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'No hay clientes registrados'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
+    const query = 'SELECT * FROM Clientes';
+    executeQuery(query).then((results) => {
+        if (results.length === 0) {
+            res.json({ message: 'No hay clientes registrados' });
+        } else {
+            res.json(results);
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
-    }
-}
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
+};
 
-const createCliente_models = (req, res) => {
+const createCliente_models = async (req, res) => {
+    const { mail, ciudad, nombreComerciante } = req.body;
     try {
-        const { mail, ciudad } = req.body;
-        console.log(req.body);
-        const query = `INSERT INTO Clientes (mail, ciudad) VALUES ('${mail}', '${ciudad}')`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Cliente creado correctamente'
-            });
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
-    }
-}
+        // Insertar el cliente en la tabla Clientes
+        const insertClienteQuery = 'INSERT INTO Clientes (mail, ciudad) VALUES (?, ?)';
+        const result = await executeQuery(insertClienteQuery, [mail, ciudad]);
+        const clienteId = result.insertId;
 
-const getCliente_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `SELECT * FROM Clientes WHERE idClientes = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }else if(rows.length == 0){
-                res.json({
-                    message: 'El cliente no existe'
-                });
-                return;
-            }
-            res.json(rows);
-        });
-    }catch (error) {
-        console.error('El error de conexión es: ' + error);
+        // Verificar si el comerciante existe
+        const idUsuarioCom = await getComercianteNombre_models(nombreComerciante);
+        if (!idUsuarioCom) {
+            const deleteClienteQuery = 'DELETE FROM Clientes WHERE idClientes = ?';
+            await executeQuery(deleteClienteQuery, [clienteId]);
+            return res.status(400).json({ error: 'El comerciante no existe' });
+        }
+
+        // Insertar en la tabla Suscripciones
+        const insertSuscripcionQuery = 'INSERT INTO Suscripciones (idUsuarioCom, idClientes) VALUES (?, ?)';
+        await executeQuery(insertSuscripcionQuery, [idUsuarioCom.idUsuarioCom, clienteId]);
+        res.json({ message: 'Cliente creado correctamente' });
+
+    } catch (error) {
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: 'El cliente ya existe' });
+        }
+        console.error('Error en la creación del cliente:', error);
+        res.status(500).json({ error: 'Error en el servidor' });
     }
-}
+};
 
 const deleteCliente_models = (req, res) => {
-    try {
-        const { id } = req.params;
-        const query = `DELETE FROM Clientes WHERE idClientes = ${id}`;
-        db.query(query, (error, rows) => {
-            if (error) {
-                console.error('El error de conexión es: ' + error);
-                return;
-            }
-            res.json({
-                message: 'Cliente eliminado correctamente'
-            });
-        });
-    }catch (error) {
+    const { id } = req.params;
+    const query = 'DELETE FROM Clientes WHERE idClientes = ?';
+    executeQuery(query, [id]).then((results) => {
+        if (results.affectedRows === 0) {
+            res.json({ message: 'El cliente no existe' });
+        } else {
+            res.json({ message: 'Cliente eliminado correctamente' });
+        }
+    }).catch((error) => {
         console.error('El error de conexión es: ' + error);
-    }
-}
-
+        res.status(500).json({ error: 'Error en el servidor' });
+    });
+};
 
 module.exports = {
-  getClientes_models,
-  createCliente_models,
-  getCliente_models,
-  deleteCliente_models
-}
+    getClientes_models,
+    createCliente_models,
+    deleteCliente_models
+};
