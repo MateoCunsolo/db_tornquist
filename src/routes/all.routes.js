@@ -39,7 +39,9 @@ const {
   createPosteo,
   getPosteo,
   deletePosteo,
-  updatePosteo
+  updatePosteo,
+  getPosteosDeComerciante,
+  getPosteosPorCategoria
 
 } = require('../controllers/posteos.controller');
 
@@ -75,6 +77,9 @@ router.post('/posteos', createPosteo); // Create posteo
 router.get('/posteos/:id', getPosteo); // Get posteo by id
 router.delete('/posteos/:id', deletePosteo); // Delete posteo by id
 router.put('/posteos/:id', updatePosteo); // Update posteo by id
+
+router.get('/posteos/comerciante/:NombreComerciante', getPosteosDeComerciante); // Get posteo by nombreComerciante
+router.get('/posteos/categoria/:NombreCategoria', getPosteosPorCategoria); // Get posteo by nombreCategoria
 
 
 //ruta geenrica si cualquier ruta es ingresada 

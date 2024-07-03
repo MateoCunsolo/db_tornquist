@@ -17,6 +17,73 @@ const getPosteos_models = (req, res) => {
     });
 };
 
+
+const getPosteosPorCategoria_models = async (req, res) => {
+    const { NombreCategoria } = req.params;
+    let idCategoria = await executeQuery('SELECT idCategoria FROM Categoria WHERE Nombre = ?', [NombreCategoria])
+    if (!idCategoria) {
+        return res.status(400).json({ message: 'El campo NombreCategoria es obligatorio' });
+    }
+    else{
+        if (idCategoria.length === 0) {
+            return res.status(400).json({ message: 'La categoria no existe' });
+        }
+        else
+        {
+            idCategoria = idCategoria[0].idCategoria;
+            const query = 'SELECT * FROM Posteo WHERE idCategoria = ?';
+            executeQuery(query, [idCategoria]).then((response) => {
+                if(response.length == 0){
+                    res.json({
+                        message: 'No hay posteos registrados'
+                    });
+                }else
+                {
+                    res.json(response);
+                }
+            }).catch((error) => {
+                console.error('El error de conexión es: ' + error);
+                res.status(500).json({ error: 'Error en el servidor' });
+            });
+        }
+    }
+};
+
+const getPosteosPorComerciante_models = async (req, res) => {
+    const { NombreComerciante } = req.params;
+    let idUsuarioCom = await executeQuery('SELECT idUsuarioCom FROM UsuariosComerciantes WHERE nombre = ?', [NombreComerciante])
+    if (!idUsuarioCom) {
+        return res.status(400).json({ message: 'El campo NombreComerciante es obligatorio' });
+    }
+    else{
+        if (idUsuarioCom.length === 0) {
+            return res.status(400).json({ message: 'El comerciante no existe' });
+        }
+        else
+        {
+            idUsuarioCom = idUsuarioCom[0].idUsuarioCom;
+            const query = 'SELECT * FROM Posteo WHERE idUsuarioCom = ?';
+            executeQuery(query, [idUsuarioCom]).then((response) => {
+                if(response.length == 0){
+                    res.json({
+                        message: 'No hay posteos registrados'
+                    });
+                }else
+                {
+                    res.json(response);
+                }
+            }).catch((error) => {
+                console.error('El error de conexión es: ' + error);
+                res.status(500).json({ error: 'Error en el servidor' });
+            });
+        }
+    }
+
+
+}
+
+
+
 const getPosteo_models = (req, res) => {
     const { id } = req.params;
     const query = 'SELECT * FROM Posteo WHERE idPosteo = ?';
@@ -111,5 +178,7 @@ module.exports = {
     createPosteo_models,
     getPosteo_models,
     deletePosteo_models,
-    updatePosteo_models
+    updatePosteo_models,
+    getPosteosPorComerciante_models,
+    getPosteosPorCategoria_models
 }

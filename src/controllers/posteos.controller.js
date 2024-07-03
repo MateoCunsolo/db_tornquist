@@ -20,10 +20,20 @@ const updatePosteo = (req, res) => {
     models.updatePosteo_models(req, res);
 };
 
+const getPosteosDeComerciante = (req, res) => {
+    models.getPosteosPorComerciante_models(req, res);
+}
+
+const getPosteosPorCategoria = (req, res) => {
+    models.getPosteosPorCategoria_models (req, res);
+}
+
 module.exports = {
     getPosteos,
     createPosteo,
     getPosteo,
     deletePosteo,
-    updatePosteo
+    updatePosteo,
+    getPosteosDeComerciante,
+    getPosteosPorCategoria
 }
